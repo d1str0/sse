@@ -60,7 +60,9 @@ work factor will be stored client side.
 Constructing the Count Table
 -
 
-This table will hold the encrypted keyword and a count of documents that match.
+This table will hold the hashed keyword and a count of documents that match.
+
+Keywords will be HMACd using the keyword and the key.
 
 
 Constructing the Index
