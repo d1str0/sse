@@ -62,7 +62,10 @@ Constructing the Count Table
 
 This table will hold the hashed keyword and a count of documents that match.
 
-Keywords will be HMACd using the keyword and the key.
+Keywords will be HMACd using the keyword and the key as the document IDs were
+HMACd above.
+
+    table[hash] = count
 
 
 Constructing the Index
@@ -71,4 +74,16 @@ Constructing the Index
 Also known as the Block Table, this will be another key value store with
 seemingly random keys and encrypted blobs for values.
 
+Each block will be holding an array of size B containing document IDs matching a
+given keyword w.
 
+From K, we derive a K1 and a K2.
+
+K1 = HMAC(K, 1||w)
+K2 = HMAC(K, 2||w)
+
+c = Count[w]
+i = floor(c/B) // 5 matches / 10 ids per block = .5 -> Block 0
+li = HMAC(K1, c) // Where c is the count in the array
+d = Enc(A, K2) // Where A is the array.
+Store[li] = d
