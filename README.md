@@ -1,5 +1,5 @@
 # go-sse
-Symmetric searchable encryption database.
+Searchable symmetric encryption.
 
 
 Overview
