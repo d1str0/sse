@@ -79,11 +79,14 @@ given keyword w.
 
 From K, we derive a K1 and a K2.
 
-K1 = HMAC(K, 1||w)
-K2 = HMAC(K, 2||w)
+    K1 = HMAC(K, 1||w)
+    K2 = HMAC(K, 2||w)
 
-c = Count[w]
-i = floor(c/B) // 5 matches / 10 ids per block = .5 -> Block 0
-li = HMAC(K1, c) // Where c is the count in the array
-d = Enc(A, K2) // Where A is the array.
-Store[li] = d
+    c = Count[w]
+    i = floor(c/B) // 5 matches / 10 ids per block = .5 -> Block 0
+    li = HMAC(K1, c) // Where c is the count in the array
+    d = Enc(A, K2) // Where A is the array.
+    Store[li] = d
+
+Note: the entire array is stored as an encrypted blob. There is no ability to
+tell that it is an array at this point.
