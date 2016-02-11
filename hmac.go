@@ -2,6 +2,7 @@ package sse
 
 import (
 	"crypto/hmac"
+	"crypto/sha256"
 )
 
 // HMAC will compute the MAC with the given message and given key.
