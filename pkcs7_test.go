@@ -62,4 +62,13 @@ func TestPad(t *testing.T) {
 }
 
 func TestUnpad(t *testing.T) {
+	for i, v := range padTests {
+		o, err := Unpad(v.output)
+		if err != nil {
+			t.Errorf("Valid padding caused error: %v", err)
+		}
+		if !bytes.Equal(o, v.input) {
+			t.Errorf("Unpad %d: expected %x, got %x", i, v.output, o)
+		}
+	}
 }
