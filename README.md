@@ -97,3 +97,11 @@ respectively.
 
 Note: the entire array is stored as an encrypted blob. There is no ability to
 tell that it is an array at this point.
+
+Installation
+=
+
+Requirements
+-
+
+This package requires github.com/d1str0/go-pkcs7 for PKCS#7 Padding.
