@@ -4,6 +4,13 @@ import (
 	"crypto/hmac"
 )
 
+// HMAC will compute the MAC with the given message and given key.
+func HMAC(message, key []byte) []byte {
+	mac := hmac.New(sha256.New, key)
+	mac.Write(message)
+	return mac.Sum(nil)
+}
+
 // CheckMAC reports whether messageMAC is a valid HMAC tag for message.
 func CheckMAC(message, messageMAC, key []byte) bool {
 	mac := hmac.New(sha256.New, key)
