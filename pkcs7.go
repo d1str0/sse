@@ -1,12 +1,12 @@
 package sse
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
+	"bytes"
+	"errors"
 )
 
-func Pad(src []byte) []byte {
-	padding := aes.BlockSize - len(src)%aes.BlockSize
+func Pad(src []byte, blockSize int) []byte {
+	padding := blockSize - len(src)%blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
 	return append(src, padtext...)
 }
