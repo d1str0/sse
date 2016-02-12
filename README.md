@@ -104,4 +104,4 @@ Installation
 Requirements
 -
 
-This package requires github.com/d1str0/go-pkcs7 for PKCS#7 Padding.
+This package requires github.com/d1str0/pkcs7 for PKCS#7 Padding.
