@@ -20,9 +20,8 @@ import (
 // The message is padded with PKCS#7 Padding and the IV is prepended to the
 // ciphertext returned.
 func Encrypt(message, key []byte) ([]byte, error) {
-	// Check to make sure the key is of an appropriate length.
-	if len(key) != 16 || len(key) != 24 || len(key) != 32 {
-		return nil, errors.New("sse: key length must be 16, 24, or 32 bytes")
+	if err := keyCheck(key); err != nil {
+		return nil, err
 	}
 
 	// We have to pad our plaintext so that it is a multiple of the block size.
@@ -64,30 +63,33 @@ func Encrypt(message, key []byte) ([]byte, error) {
 	return ciphertext, nil
 }
 
-func Decrypt(ciphertext, key []byte) ([]byte, error) {
-	// Check to make sure the key is of an appropriate length.
-	if len(key) != 16 || len(key) != 24 || len(key) != 32 {
-		return nil, errors.New("sse: key length must be 16, 24, or 32 bytes")
+func Decrypt(message, key []byte) ([]byte, error) {
+	if err := keyCheck(key); err != nil {
+		return nil, err
 	}
 
 	// Make sure the ciphertext is a valid size.
-	if len(ciphertext) < aes.BlockSize {
-		return nil, errors.New("sse: ciphertext is too short")
+	if len(message) < aes.BlockSize {
+		return nil, errors.New("sse: message is too short")
 	}
 
 	// CBC mode always works in whole blocks.
-	if len(ciphertext)%aes.BlockSize != 0 {
-		return nil, errors.New("sse: ciphertext length is not a multiple of the AES Block Size")
+	if len(message)%aes.BlockSize != 0 {
+		return nil, errors.New("sse: message length is not a multiple of the AES Block Size")
 	}
 
 	// The IV needs to be unique, but not secure. Therefore it's common to
 	// include it at the beginning of the ciphertext.
 
-	// Store the IV
-	iv := ciphertext[:aes.BlockSize]
-
 	// Remove the IV from the ciphertext
-	ciphertext = ciphertext[aes.BlockSize:]
+	iv := message[:aes.BlockSize]
+
+	// First we'll make a copy of the message bytes so we don't screw up the
+	// passed in memory.
+	ciphertext := make([]byte, len(message)-aes.BlockSize)
+
+	// Copy in the ciphertext sans IV
+	copy(ciphertext, message[aes.BlockSize:])
 
 	// Create a new cipher.Block with the given key.
 	block, err := aes.NewCipher(key)
@@ -109,4 +111,13 @@ func Decrypt(ciphertext, key []byte) ([]byte, error) {
 	}
 
 	return plaintext, nil
+}
+
+func keyCheck(key []byte) error {
+	// Check to make sure the key is of an appropriate length.
+	if len(key) != 16 && len(key) != 24 && len(key) != 32 {
+		return errors.New("sse: key length must be 16, 24, or 32 bytes")
+	}
+
+	return nil
 }
