@@ -1,4 +1,4 @@
-package sse
+package main
 
 import (
 	"crypto/hmac"
