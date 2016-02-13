@@ -103,7 +103,10 @@ func Decrypt(ciphertext, key []byte) ([]byte, error) {
 
 	// ciphertext has now been decrypted so we need to remove any padding added
 	// before encryption.
-	plaintext := pkcs7.Unpad(ciphertext)
+	plaintext, err := pkcs7.Unpad(ciphertext)
+	if err != nil {
+		return nil, err
+	}
 
 	return plaintext, nil
 }
