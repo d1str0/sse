@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 )
 
 func main() {
@@ -32,4 +33,15 @@ func main() {
 	p2, _ := Decrypt(c2, key)
 	p3, _ := Decrypt(c3, key)
 	fmt.Printf("Decrypted:\n\t1: %s\n\t2: %s\n\t3: %s\n", p1, p2, p3)
+
+	db, err := BoltDBOpen()
+	if err != nil {
+		fmt.Printf("Error creating BoldDB database: %v", err)
+		os.Exit(1)
+	}
+	err = db.Init()
+	if err != nil {
+		fmt.Printf("Error creating BoldDB database: %v", err)
+		os.Exit(1)
+	}
 }
