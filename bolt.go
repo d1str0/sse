@@ -15,16 +15,16 @@ type BoltDB struct {
 	Conn *bolt.DB
 }
 
-func BoltDBOpen() (*BoltDB, error) {
+func BoltDBOpen() (BoltDB, error) {
 	db, err := bolt.Open("my.db", 0600, nil)
 	if err != nil {
-		return nil, err
+		return BoltDB{}, err
 	}
-	conn := &BoltDB{Conn: db}
+	conn := BoltDB{Conn: db}
 	return conn, nil
 }
 
-func (db *BoltDB) Init() error {
+func (db BoltDB) Init() error {
 	err := db.Conn.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte(DOCUMENTS))
 		if err != nil {
@@ -44,7 +44,7 @@ func (db *BoltDB) Init() error {
 	return err
 }
 
-func (db *BoltDB) Get(bucket string, id []byte) ([]byte, error) {
+func (db BoltDB) Get(bucket string, id []byte) ([]byte, error) {
 	var value []byte
 	// Use View() to enforce read-only access to BoltDB.
 	err := db.Conn.View(func(tx *bolt.Tx) error {
@@ -61,7 +61,7 @@ func (db *BoltDB) Get(bucket string, id []byte) ([]byte, error) {
 	return value, err
 }
 
-func (db *BoltDB) Put(bucket string, id, value []byte) error {
+func (db BoltDB) Put(bucket string, id, value []byte) error {
 	// Use Update() to enforce read-write access to BoltDB.
 	err := db.Conn.Update(func(tx *bolt.Tx) error {
 		// TODO: Put logic
@@ -76,7 +76,7 @@ func (db *BoltDB) Put(bucket string, id, value []byte) error {
 	return err
 }
 
-func (db *BoltDB) Delete(bucket string, id []byte) error {
+func (db BoltDB) Delete(bucket string, id []byte) error {
 	// Use Update() to enforce read-write access to BoltDB.
 	err := db.Conn.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
@@ -90,6 +90,6 @@ func (db *BoltDB) Delete(bucket string, id []byte) error {
 	return err
 }
 
-func (db *BoltDB) Close() {
+func (db BoltDB) Close() {
 	db.Conn.Close()
 }

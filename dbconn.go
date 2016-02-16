@@ -2,8 +2,8 @@ package sse
 
 type DBConn interface {
 	Init() error
-	Get(table, id string) ([]byte, error)
-	Put(table, id string, value []byte) error
-	Delete(table, id string) error
+	Get(table string, id []byte) ([]byte, error)
+	Put(table string, id, value []byte) error
+	Delete(table string, id []byte) error
 	Close()
 }

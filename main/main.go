@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
 	"github.com/d1str0/sse"
 	"os"
@@ -39,6 +39,7 @@ func main() {
 	p3, _ := sse.Decrypt(c3, key)
 	fmt.Printf("Decrypted:\n\t1: %s\n\t2: %s\n\t3: %s\n\n", p1, p2, p3)
 
+	var db sse.DBConn
 	db, err := sse.BoltDBOpen()
 	if err != nil {
 		fmt.Printf("Error creating BoldDB database: %v", err)
@@ -46,7 +47,7 @@ func main() {
 	}
 	defer db.Close()
 
-	prev := db.Conn.Stats()
+	//prev := db.Conn.Stats()
 
 	err = db.Init()
 	if err != nil {
@@ -100,9 +101,9 @@ func main() {
 	}
 
 	// Grab the current stats and diff them.
-	stats := db.Conn.Stats()
-	diff := stats.Sub(&prev)
+	//stats := db.Conn.Stats()
+	//diff := stats.Sub(&prev)
 
 	// Encode stats to JSON and print to STDERR.
-	json.NewEncoder(os.Stdout).Encode(diff)
+	//json.NewEncoder(os.Stdout).Encode(diff)
 }
