@@ -1,4 +1,4 @@
-package main
+package sse
 
 import (
 	"crypto/aes"

@@ -1,4 +1,4 @@
-package main
+package sse
 
 type Conn interface {
 	Init() error
