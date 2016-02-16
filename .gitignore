@@ -1,5 +1,6 @@
 go-sse
 my.db
+main/main
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o
 *.a

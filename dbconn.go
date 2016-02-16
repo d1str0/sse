@@ -1,6 +1,6 @@
 package sse
 
-type Conn interface {
+type DBConn interface {
 	Init() error
 	Get(table, id string) ([]byte, error)
 	Put(table, id string, value []byte) error
