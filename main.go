@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 )
@@ -40,6 +41,8 @@ func main() {
 		os.Exit(1)
 	}
 	defer db.Close()
+
+	prev := db.Conn.Stats()
 
 	err = db.Init()
 	if err != nil {
@@ -91,4 +94,11 @@ func main() {
 		fmt.Printf("Error creating BoldDB database: %v", err)
 		os.Exit(1)
 	}
+
+	// Grab the current stats and diff them.
+	stats := db.Conn.Stats()
+	diff := stats.Sub(&prev)
+
+	// Encode stats to JSON and print to STDERR.
+	json.NewEncoder(os.Stdout).Encode(diff)
 }
