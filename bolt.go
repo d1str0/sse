@@ -44,7 +44,7 @@ func (db *BoltDB) Init() error {
 	return err
 }
 
-func (db *BoltDB) Get(bucket, id string) ([]byte, error) {
+func (db *BoltDB) Get(bucket string, id []byte) ([]byte, error) {
 	var value []byte
 	// Use View() to enforce read-only access to BoltDB.
 	err := db.Conn.View(func(tx *bolt.Tx) error {
@@ -52,7 +52,7 @@ func (db *BoltDB) Get(bucket, id string) ([]byte, error) {
 		if b == nil {
 			return errors.New("BoltDB: bucket not found")
 		}
-		temp := b.Get([]byte(id))
+		temp := b.Get(id)
 		value = make([]byte, len(temp))
 		copy(value, temp)
 		return nil
@@ -61,7 +61,7 @@ func (db *BoltDB) Get(bucket, id string) ([]byte, error) {
 	return value, err
 }
 
-func (db *BoltDB) Put(bucket, id string, value []byte) error {
+func (db *BoltDB) Put(bucket string, id, value []byte) error {
 	// Use Update() to enforce read-write access to BoltDB.
 	err := db.Conn.Update(func(tx *bolt.Tx) error {
 		// TODO: Put logic
@@ -69,21 +69,21 @@ func (db *BoltDB) Put(bucket, id string, value []byte) error {
 		if b == nil {
 			return errors.New("BoltDB: bucket not found")
 		}
-		err := b.Put([]byte(id), value)
+		err := b.Put(id, value)
 		return err
 	})
 
 	return err
 }
 
-func (db *BoltDB) Delete(bucket, id string) error {
+func (db *BoltDB) Delete(bucket string, id []byte) error {
 	// Use Update() to enforce read-write access to BoltDB.
 	err := db.Conn.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		if b == nil {
 			return errors.New("BoltDB: bucket not found")
 		}
-		err := b.Delete([]byte(id))
+		err := b.Delete(id)
 		return err
 	})
 
