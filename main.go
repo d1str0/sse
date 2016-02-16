@@ -7,8 +7,11 @@ import (
 )
 
 func main() {
-	key := []byte("1234567890123456")
-	fmt.Printf("Key: %s\n", key)
+	password := []byte("hunter2")
+	salt, _ := Salt()
+
+	key := Key(password, salt, 4096)
+	fmt.Printf("Key: %x\n", key)
 
 	test1 := []byte("sometimes I fart loudly in my sleep")
 	test2 := []byte("He wasn’t exactly the boogeyman, he was the guy you called to kill the boogeyman.")
