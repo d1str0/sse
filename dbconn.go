@@ -1,5 +1,11 @@
 package sse
 
+const (
+	DOCUMENTS = "documents"
+	COUNTS    = "counts"
+	INDEX     = "index"
+)
+
 type DBConn interface {
 	Init() error
 	Get(table string, id []byte) ([]byte, error)

@@ -5,12 +5,6 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-const (
-	DOCUMENTS = "documents"
-	COUNTS    = "counts"
-	INDEX     = "index"
-)
-
 type BoltDB struct {
 	Conn *bolt.DB
 }
