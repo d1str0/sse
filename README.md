@@ -15,6 +15,16 @@ Marcel-Catalin Ros, and Michael Steiner.
 Implementation
 =
 
+Crypto 
+-
+
+    AES-CBC + HMAC
+
+    MasterKey = PBKDF2(password, salt, iter, size)
+    AES-Key = HMAC(MasterKey, "AES-Key" | 0x01)
+    MAC-Key = HMAC(MasterKey, "MAC-Key" | 0x01)
+
+
 Data Structures
 -
 
