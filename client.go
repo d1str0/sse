@@ -18,9 +18,9 @@ const (
 var One = []byte{0x01} // Needed for different keys.
 var Two = []byte{0x02}
 
-func NewClient(db DBConn) *Client {
-	db.Init()
-	return &Client{DB: db}
+func NewClient(db DBConn) (*Client, error) {
+	err := db.Init()
+	return &Client{DB: db}, err
 }
 
 // Get a document back from the store with the given ID.
@@ -44,6 +44,12 @@ func (c *Client) Put(id string, doc []byte) error {
 	// Now that it's encrypted, store it in the DB.
 	err = c.DB.Put(DOCUMENTS, []byte(id), edoc)
 	return err
+}
+
+// Get a document back from the store with the given ID.
+func (c *Client) Delete(id string) error {
+	// Get the encrypted doc from the database.
+	return c.DB.Delete(DOCUMENTS, []byte(id))
 }
 
 // Get the current count value for a given keyword.
