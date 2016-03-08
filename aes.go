@@ -19,6 +19,9 @@ import (
 //
 // The message is padded with PKCS#7 Padding and the IV is prepended to the
 // ciphertext returned.
+//
+// For authentication, the HMAC of the encrypted is appended to the ciphertext
+// returned.
 func Encrypt(message, key []byte) ([]byte, error) {
 	if err := keyCheck(key); err != nil {
 		return nil, err
@@ -33,8 +36,9 @@ func Encrypt(message, key []byte) ([]byte, error) {
 
 	// The IV needs to be unique, but not secure. Therefore it's common to
 	// include it at the beginning of the ciphertext.
+	//
 	// Here we make room in the ciphertext byte slice to prepend the IV of size
-	// aes.BlockSize
+	// aes.BlockSize.
 	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
 
 	// Get a slice of the resulting ciphertext byte slice for the first
@@ -46,8 +50,10 @@ func Encrypt(message, key []byte) ([]byte, error) {
 		return nil, err
 	}
 
+	// Generate keys for HMAC and AES.
+	aes_key, mac_key := DeriveKeys(key)
 	// Create a new cipher.Block with the given key.
-	block, err := aes.NewCipher(key)
+	block, err := aes.NewCipher(aes_key)
 	if err != nil {
 		return nil, err
 	}
@@ -59,6 +65,10 @@ func Encrypt(message, key []byte) ([]byte, error) {
 	// ciphertext byte slice *after* the point at which the IV is store.
 	mode.CryptBlocks(ciphertext[aes.BlockSize:], plaintext)
 
+	// Now let's append the HMAC.
+	hmac := HMAC(ciphertext[aes.BlockSize:aes.BlockSize+len(plaintext)], mac_key)
+	ciphertext = append(ciphertext, hmac[:]...)
+
 	// Return the resulting ciphertext byte slice.
 	return ciphertext, nil
 }
@@ -69,7 +79,7 @@ func Decrypt(message, key []byte) ([]byte, error) {
 	}
 
 	// Make sure the ciphertext is a valid size.
-	if len(message) < aes.BlockSize {
+	if len(message) < aes.BlockSize*2+HMACSize {
 		return nil, errors.New("sse: message is too short")
 	}
 
@@ -83,16 +93,25 @@ func Decrypt(message, key []byte) ([]byte, error) {
 
 	// Remove the IV from the ciphertext
 	iv := message[:aes.BlockSize]
+	hmac := message[len(message)-HMACSize:]
 
 	// First we'll make a copy of the message bytes so we don't screw up the
 	// passed in memory.
-	ciphertext := make([]byte, len(message)-aes.BlockSize)
+	ciphertext := make([]byte, len(message)-aes.BlockSize-HMACSize)
 
 	// Copy in the ciphertext sans IV
-	copy(ciphertext, message[aes.BlockSize:])
+	copy(ciphertext, message[aes.BlockSize:len(message)-HMACSize])
+
+	// Derive keys from master key.
+	aes_key, mac_key := DeriveKeys(key)
+
+	// Check ciphertext against MAC
+	if !CheckMAC(ciphertext, hmac, mac_key) {
+		return nil, errors.New("sse: message's ciphertext does not match MAC")
+	}
 
 	// Create a new cipher.Block with the given key.
-	block, err := aes.NewCipher(key)
+	block, err := aes.NewCipher(aes_key)
 	if err != nil {
 		return nil, err
 	}
