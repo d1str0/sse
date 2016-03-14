@@ -1,92 +1,107 @@
 package main
 
 import (
-	//"encoding/json"
+	// "encoding/json"
+	"flag"
 	"fmt"
-	"github.com/d1str0/sse"
+	//	"github.com/d1str0/sse"
+	//	"io/ioutil"
+	//	"net/mail"
 	"os"
+	//	"strings"
 )
 
+var mailDir string // Directory to load
+
+var fileCount int
+var dirCount int
+
+type Identity struct {
+	password string
+	salt     string
+	iter     int
+}
+
+var id = Identity{
+	password: "hunter2",
+	salt:     "So Salty",
+	iter:     4096,
+}
+
 func main() {
-	password := "hunter2"
-	salt, _ := sse.Salt()
+	flag.StringVar(&mailDir, "mail-dir", "", "directory to load mail archives from")
+	flag.Parse()
 
-	test1 := []byte("sometimes I fart loudly in my sleep")
-	test2 := []byte("He wasn’t exactly the boogeyman, he was the guy you called to kill the boogeyman.")
-	test3 := []byte("1337")
-	fmt.Printf("Test:\n\t1: %s\n\t2: %s\n\t3: %s\n\n", test1, test2, test3)
+	ReadAllFiles(mailDir)
 
-	var db sse.DBConn
-	db, err := sse.BoltDBOpen()
+	fmt.Printf("%d total files in %d different directories!\n", fileCount, dirCount)
+}
+
+func ReadAllFiles(filename string) {
+	f, err := os.Open(filename)
 	if err != nil {
-		fmt.Printf("Error creating BoldDB database: %v", err)
-		os.Exit(1)
-	}
-	defer db.Close()
-
-	//prev := db.Conn.Stats()
-
-	c, err := sse.NewClient(db)
-	if err != nil {
-		fmt.Printf("Error creating BoltDB database: %v", err)
-		os.Exit(1)
-	}
-	c.SetKey(password, string(salt), 4096)
-
-	h1 := "test1"
-	err = c.Put(h1, test1)
-	if err != nil {
-		fmt.Printf("Error creating BoltDB database: %v", err)
+		fmt.Printf("Error opening file %s: %s\n", filename, err.Error())
 		os.Exit(1)
 	}
 
-	h2 := "test2"
-	err = c.Put(h2, test2)
+	stat, err := f.Stat()
 	if err != nil {
-		fmt.Printf("Error creating BoltDB database: %v", err)
+		fmt.Printf("Error opening file stat %s: %s\n", filename, err.Error())
 		os.Exit(1)
 	}
 
-	h3 := "test3"
-	err = c.Put(h3, test3)
+	if stat.IsDir() {
+		files, err := f.Readdir(0)
+		if err != nil {
+			fmt.Printf("Error reading directory %s: %s\n", stat.Name(), err.Error())
+			os.Exit(1)
+		}
+		//fmt.Printf("%s/\n", stat.Name())
+
+		err = f.Close()
+		if err != nil {
+			fmt.Printf("Error closing directory %s: %s\n", stat.Name(), err.Error())
+			os.Exit(1)
+		}
+
+		for _, file := range files {
+
+			ReadAllFiles(fmt.Sprintf("%s/%s", filename, file.Name()))
+		}
+
+		dirCount++
+		return
+	}
+	err = f.Close()
 	if err != nil {
-		fmt.Printf("Error creating BoltDB database: %v", err)
+		fmt.Printf("Error closing file %s: %s\n", stat.Name(), err.Error())
 		os.Exit(1)
 	}
 
-	cc1, err := c.Get(h1)
+	//fmt.Printf("%s\n", stat.Name())
+
+	fileCount++
+}
+
+/*
+	m, err := mail.ReadMessage(f)
 	if err != nil {
-		fmt.Printf("Error creating BoltDB database: %v", err)
+		fmt.Printf("Error reading mail message: %#v\n", err)
 		os.Exit(1)
 	}
 
-	cc2, err := c.Get(h2)
+	header := m.Header
+	fmt.Println("Date:", header.Get("Date"))
+	fmt.Println("From:", header.Get("From"))
+	fmt.Println("To:", header.Get("To"))
+	fmt.Println("Subject:", header.Get("Subject"))
+
+	body, err := ioutil.ReadAll(m.Body)
 	if err != nil {
-		fmt.Printf("Error creating BoltDB database: %v", err)
+		fmt.Printf("Error reading all of message body: %#v\n", err)
 		os.Exit(1)
 	}
-
-	cc3, err := c.Get(h3)
-	if err != nil {
-		fmt.Printf("Error creating BoltDB database: %v", err)
-		os.Exit(1)
-	}
-
-	fmt.Printf("%s: %s\n%s: %s\n%s: %s\n", h1, cc1, h2, cc2, h3, cc3)
-
-	err = c.Delete(h1)
-	err = c.Delete(h2)
-	err = c.Delete(h3)
-	if err != nil {
-		fmt.Printf("Error creating BoltDB database: %v", err)
-		os.Exit(1)
-	}
-
-	// Grab the current stats and diff them.
-	//stats := db.Conn.Stats()
-	//diff := stats.Sub(&prev)
-
-	// Encode stats to JSON and print to STDERR.
-	//json.NewEncoder(os.Stdout).Encode(diff)
+	fmt.Printf("%s", body)
 
 }
+*/

@@ -61,12 +61,31 @@ func (c *Client) Count(keyword string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	i, err := strconv.Atoi(string(count))
-	if err != nil {
-		return 0, err
+	var i int
+	if len(count) == 0 {
+		i = 0
+		err := c.SetCount(keyword, i)
+		if err != nil {
+			return 0, err
+		}
+	} else {
+		i, err = strconv.Atoi(string(count))
+		if err != nil {
+			return 0, err
+		}
+
 	}
 
 	return i, nil
+}
+
+func (c *Client) SetCount(keyword string, count int) error {
+	// HMAC the keyword.
+	ekey := HMAC([]byte(keyword), c.key)
+
+	i := strconv.Itoa(count)
+	err := c.DB.Put(COUNTS, ekey, []byte(i))
+	return err
 }
 
 // Find all document IDs associated with the given keyword.
@@ -101,7 +120,6 @@ func (c *Client) Search(keyword string) (ids []string, err error) {
 			err = err2
 			return
 		}
-		// TODO: Store HMAC somewhere (probably appended to encrypted blob?)
 
 		var block []string
 		err = json.Unmarshal(pjson, &block)
@@ -117,7 +135,7 @@ func (c *Client) Search(keyword string) (ids []string, err error) {
 
 /*
 // TODO: Use an argument list here or not? (ie. keywords ...string)
-func (c *Client) AddDocsToKeyword(doc string, keywords []string) error {
+func (c *Client) AddDocsToKeyword(keyword string, docs []string) error {
 
 }
 
@@ -126,6 +144,74 @@ func (c *Client) AddKeywordsToDoc(doc string, keywords []string) error {
 
 }
 */
+
+func (c *Client) AddDocToKeyword(keyword, doc string) error {
+	kw1 := append([]byte(keyword), One[:]...) // We append a constant to each keyword before MAC
+	kw2 := append([]byte(keyword), Two[:]...)
+	k1 := HMAC(kw1, c.key) // Generate two separate keys.
+	k2 := HMAC(kw2, c.key)
+
+	// Get count
+	count, err := c.Count(keyword)
+	if err != nil {
+		return err
+	}
+
+	max := int(math.Floor(float64(count) / float64(BlobSize)))
+
+	// Generate the id of this block using k1.
+	h := HMAC(append([]byte("COUNT"), byte(max)), k1)
+
+	// Get the encrypted blob.
+	ejson, err := c.DB.Get(INDEX, h)
+	if err != nil {
+		return err
+	}
+
+	var block []string
+	var pjson []byte
+	if len(ejson) > 0 {
+		// Decrypt the blob with k2.
+		pjson, err = Decrypt(ejson, k2)
+		if err != nil {
+			return err
+		}
+		err = json.Unmarshal(pjson, &block)
+		if err != nil {
+			return err
+		}
+
+	}
+
+	// If we are overflowing this block
+	if len(block) > 10 {
+		block = make([]string, 10)
+		max := max + 1
+		h = HMAC(append([]byte("COUNT"), byte(max)), k1)
+	}
+	block = append(block, doc)
+
+	// Get the json for the array
+	pjson, err = json.Marshal(block)
+	if err != nil {
+		return err
+	}
+
+	ejson, err = Encrypt(pjson, k2)
+	if err != nil {
+		return err
+	}
+
+	err = c.DB.Put(INDEX, h, ejson)
+	if err != nil {
+		return err
+	}
+
+	c.SetCount(keyword, count+1)
+	return err
+
+}
+
 // Set the key for the client.
 func (c *Client) SetKey(passphrase, salt string, iter int) {
 	c.key = Key([]byte(passphrase), []byte(salt), iter)
