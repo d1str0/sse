@@ -51,7 +51,7 @@ func main() {
 	ReadAllFiles(mailDir)
 
 	fmt.Printf("%d total files in %d different directories!\n", fileCount, dirCount)
-	ids, err := c.Search("grensheltr@aol.com")
+	ids, err := c.Search("justin.boyd@enron.com")
 	if err != nil {
 		fmt.Printf("Error searching database: %v", err)
 		os.Exit(1)
@@ -64,7 +64,6 @@ func main() {
 }
 
 func ReadAllFiles(filename string) {
-	fmt.Printf("Reading file %s\t", filename)
 	f, err := os.Open(filename)
 	if err != nil {
 		fmt.Printf("Error opening file %s: %s\n", filename, err.Error())
@@ -115,21 +114,28 @@ func ParseMail(f *os.File) {
 	m, err := mail.ReadMessage(f)
 	if err != nil {
 		fmt.Printf("Error reading mail message: %v\n", err)
-		os.Exit(1)
+		stat, err := f.Stat()
+		if err != nil {
+			fmt.Printf("Error reading mail message: %v, %s\n", err, stat.Name())
+		}
+		return
+		//	os.Exit(1)
 	}
 
-	stat, err := f.Stat()
-	if err != nil {
-		fmt.Printf("Error reading mail message: %v\n", err)
-		os.Exit(1)
-	}
+	/*
+		stat, err := f.Stat()
+		if err != nil {
+			fmt.Printf("Error reading mail message: %v\n", err)
+			os.Exit(1)
+		}
+	*/
 
 	header := m.Header
 	tags := []string{}
 
 	addrs, err := mail.ParseAddressList(header.Get("From"))
 	if err != nil {
-		fmt.Printf("Error reading mail message: %v, %s\n", err, stat.Name())
+		//fmt.Printf("Error reading mail message: %v, %s\n", err, stat.Name())
 	} else {
 		for _, addr := range addrs {
 			tags = append(tags, addr.Address)
@@ -138,7 +144,7 @@ func ParseMail(f *os.File) {
 
 	addrs, err = mail.ParseAddressList(header.Get("To"))
 	if err != nil {
-		fmt.Printf("Error reading mail message: %v, %s\n", err, stat.Name())
+		//fmt.Printf("Error reading mail message: %v, %s\n", err, stat.Name())
 	} else {
 		for _, addr := range addrs {
 			tags = append(tags, addr.Address)
