@@ -84,7 +84,11 @@ func main() {
 	db.Delete(sse.DOCUMENTS, h2)
 	db.Delete(sse.DOCUMENTS, h3)
 
-	c := sse.NewClient(db)
+	c, err := sse.NewClient(db)
+	if err != nil {
+		fmt.Printf("Error creating client: %v", err)
+		os.Exit(1)
+	}
 	c.SetKey("hunter2", "farts", 4096)
 	err = c.Put("test1", test1)
 	if err != nil {
