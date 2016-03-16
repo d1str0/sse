@@ -51,7 +51,7 @@ func main() {
 	ReadAllFiles(mailDir)
 
 	fmt.Printf("%d total files in %d different directories!\n", fileCount, dirCount)
-	ids, err := c.Search("justin.boyd@enron.com")
+	ids, err := c.Search("grensheltr@aol.com")
 	if err != nil {
 		fmt.Printf("Error searching database: %v", err)
 		os.Exit(1)
@@ -83,7 +83,7 @@ func ReadAllFiles(filename string) {
 			fmt.Printf("Error reading directory %s: %s\n", stat.Name(), err.Error())
 			os.Exit(1)
 		}
-		//fmt.Printf("%s/\n", stat.Name())
+		fmt.Printf("%s/\n", stat.Name())
 
 		err = f.Close()
 		if err != nil {
@@ -166,6 +166,6 @@ func ParseMail(f *os.File) {
 		}
 	}
 
-	fmt.Printf("Added document %d\n", fileCount)
+	//fmt.Printf("Added document %d\n", fileCount)
 
 }
