@@ -102,6 +102,9 @@ func (c *Client) Search(keyword string) (ids []string, err error) {
 	}
 
 	max := int(math.Floor(float64(count) / float64(BlobSize)))
+	if count%BlobSize == 0 {
+		max = max - 1
+	}
 	for i := 0; i <= max; i++ {
 
 		// Generate the id of this block using k1.
@@ -184,9 +187,9 @@ func (c *Client) AddDocToKeyword(keyword, doc string) error {
 	}
 
 	// If we are overflowing this block
-	if len(block) > 10 {
+	if len(block) >= 10 {
 		block = make([]string, 10)
-		max := max + 1
+		max = max + 1
 		h = HMAC(append([]byte("COUNT"), byte(max)), k1)
 	}
 	block = append(block, doc)
