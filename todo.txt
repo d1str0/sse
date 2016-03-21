@@ -1,0 +1,7 @@
+0. Index To, From
+1. Index body, subject
+    - Stemming (porter)
+    - Stop Words
+2. "smart" indexing for headers
+3. Performance "benchmarks"
+4. Jaccard (on sets of docs)
