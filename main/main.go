@@ -99,7 +99,7 @@ func ReadAllFiles(filename string) {
 		return
 	}
 
-	ParseMail(f)
+	//	ParseMail(f)
 
 	err = f.Close()
 	if err != nil {
