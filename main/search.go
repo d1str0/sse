@@ -47,7 +47,7 @@ func main() {
 	}
 	fmt.Println("Found these IDs:")
 	for _, id := range ids {
-		fmt.Println(id)
+		fmt.Printf("%s\n", id)
 	}
 
 }
