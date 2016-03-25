@@ -1,14 +1,12 @@
 package main
 
 import (
-	// "encoding/json"
 	"flag"
 	"fmt"
 	"github.com/d1str0/sse"
 	"io/ioutil"
 	"net/mail"
 	"os"
-	//	"strings"
 	"strconv"
 )
 
@@ -99,7 +97,7 @@ func ReadAllFiles(filename string) {
 		return
 	}
 
-	//	ParseMail(f)
+	ParseMail(f)
 
 	err = f.Close()
 	if err != nil {
@@ -119,7 +117,6 @@ func ParseMail(f *os.File) {
 			fmt.Printf("Error reading mail message: %v, %s\n", err, stat.Name())
 		}
 		return
-		//	os.Exit(1)
 	}
 
 	/*
