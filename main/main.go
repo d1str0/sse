@@ -49,7 +49,7 @@ func main() {
 	ReadAllFiles(mailDir)
 
 	fmt.Printf("%d total files in %d different directories!\n", fileCount, dirCount)
-	ids, err := c.Search("justin.boyd@enron.com")
+	ids, err := c.Search("pallen@enron.com")
 	if err != nil {
 		fmt.Printf("Error searching database: %v", err)
 		os.Exit(1)
